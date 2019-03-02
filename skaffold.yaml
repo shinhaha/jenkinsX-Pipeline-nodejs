@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/shinhaha/jexkinsx-pipeline-nodejs:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/shinhaha/jexkinsx-pipeline-nodejs:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jexkinsx-pipeline-nodejs
+        chartPath: charts/jexkinsx-pipeline-nodejs
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/shinhaha/jexkinsx-pipeline-nodejs"
+          image.tag: "{{.DIGEST_HEX}}"
